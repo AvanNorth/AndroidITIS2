@@ -3,6 +3,7 @@ package com.pskda.androiditis2.data
 import com.pskda.androiditis2.BuildConfig
 import com.pskda.androiditis2.data.api.Api
 import com.pskda.androiditis2.data.api.response.WeatherResponse
+import com.pskda.androiditis2.data.api.response.WeatherResponseList
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -55,10 +56,12 @@ class WeatherRepository {
     suspend fun getWeather(cityName: String): WeatherResponse {
         return api.getWeather(cityName)
     }
+
     suspend fun getWeather(cityId: Int): WeatherResponse {
         return api.getWeather(cityId)
     }
-    suspend fun getNearWeather(lat: Double, lon: Double): WeatherResponse {
-        return api.getNearCity(lat,lon)
+
+    suspend fun getNearWeather(lat: Double, lon: Double): WeatherResponseList {
+        return api.getNearCity(lat, lon)
     }
 }
