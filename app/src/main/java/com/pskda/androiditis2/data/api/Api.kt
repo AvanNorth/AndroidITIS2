@@ -8,6 +8,8 @@ import retrofit2.http.Query
 interface Api {
     @GET("weather?units=metric&lang=RU")
     suspend fun getWeather(@Query("q") cityName: String): WeatherResponse
+
+    @GET("weather?units=metric&lang=RU")
     suspend fun getWeather(@Query("id") cityId: Int): WeatherResponse
 
     @GET("find?units=metric&lang=RU")

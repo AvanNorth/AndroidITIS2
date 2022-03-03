@@ -1,6 +1,7 @@
 package com.pskda.androiditis2
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.media.session.PlaybackState
@@ -114,11 +115,10 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val response = weatherRepository.getWeather(cityName)
-                Snackbar.make(
-                    findViewById(android.R.id.content),
-                    "Temp: ${response.main.temp} C\nCityCode: ${response.sys.id}",
-                    Snackbar.LENGTH_LONG
-                ).show()
+                val intent = Intent(this@MainActivity, WeatherActivity::class.java).apply {
+                    putExtra("CityId", response.id)
+                }
+                startActivity(intent)
             } catch (ex: Exception) {
                 Snackbar.make(
                     findViewById(android.R.id.content),
