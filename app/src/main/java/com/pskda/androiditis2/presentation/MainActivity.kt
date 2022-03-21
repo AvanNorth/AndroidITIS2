@@ -1,10 +1,9 @@
-package com.pskda.androiditis2
+package com.pskda.androiditis2.presentation
 
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.media.session.PlaybackState
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -18,21 +17,19 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import com.pskda.androiditis2.adapter.WeatherAdapter
-import com.pskda.androiditis2.data.WeatherRepository
-import com.pskda.androiditis2.data.api.response.WeatherResponse
-import com.pskda.androiditis2.data.api.response.WeatherResponseList
+import com.pskda.androiditis2.data.WeatherRepositoryImpl
+import com.pskda.androiditis2.data.api.model.WeatherResponseList
 import com.pskda.androiditis2.databinding.ActivityMainBinding
-import com.pskda.androiditis2.databinding.RecyclerviewItemBinding
+import com.pskda.androiditis2.domain.entity.Cities
+import com.pskda.androiditis2.domain.usecase.GetNearCitiesUseCase
+import com.pskda.androiditis2.domain.usecase.GetWeatherByNameUseCase
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-
-
-    private val weatherRepository by lazy {
-        WeatherRepository()
-    }
+    private lateinit var getNearWeather: GetNearCitiesUseCase
+    private lateinit var getWeahterByNameUseCase: GetWeatherByNameUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,7 +95,8 @@ class MainActivity : AppCompatActivity() {
                             lon = location.longitude
                         }
                     }
-                val responseList: WeatherResponseList = weatherRepository.getNearWeather(lat, lon)
+                val responseList: Cities = getNearWeather(lat, lon, 10)
+
                 weatherList.adapter = WeatherAdapter(responseList)
             } catch (ex: Exception) {
                 Snackbar.make(
@@ -114,7 +112,7 @@ class MainActivity : AppCompatActivity() {
     private fun searchCity(cityName: String) {
         lifecycleScope.launch {
             try {
-                val response = weatherRepository.getWeather(cityName)
+                val response = getWeahterByNameUseCase(cityName)
                 val intent = Intent(this@MainActivity, WeatherActivity::class.java).apply {
                     putExtra("CityId", response.id)
                 }

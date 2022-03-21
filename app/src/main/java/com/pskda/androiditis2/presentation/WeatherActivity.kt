@@ -1,22 +1,23 @@
-package com.pskda.androiditis2
+package com.pskda.androiditis2.presentation
 
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.pskda.androiditis2.data.WeatherRepository
-import com.pskda.androiditis2.data.api.response.WeatherResponse
+import com.pskda.androiditis2.R
+import com.pskda.androiditis2.data.WeatherRepositoryImpl
+import com.pskda.androiditis2.data.api.model.WeatherResponse
 import com.pskda.androiditis2.databinding.ActivityWeatherBinding
+import com.pskda.androiditis2.domain.entity.Weather
+import com.pskda.androiditis2.domain.usecase.GetWeatherByIdUseCase
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
 
 class WeatherActivity : AppCompatActivity() {
     private lateinit var binding: ActivityWeatherBinding
+    private lateinit var getWeatherUserCase: GetWeatherByIdUseCase
 
-    private val weatherRepository by lazy {
-        WeatherRepository()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,21 +25,20 @@ class WeatherActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val cityId = intent.getIntExtra("CityId", 0)
-        var response: WeatherResponse
+        var response: Weather
 
         lifecycleScope.launch {
             try {
-                response = weatherRepository.getWeather(cityId)
+                response = getWeatherUserCase(cityId)
                 setWeather(
                     binding,
                     response.name,
-                    response.sys.country,
-                    response.main.temp,
-                    response.weather[0].description,
-                    response.wind.speed,
-                    response.weather[0].icon,
-                    response.wind.deg,
-                    response.main.feels_like
+                    response.temp,
+                    response.desc,
+                    response.windSpeed,
+                    response.icon,
+                    response.windDir,
+                    response.feelsLike
                 )
             } catch (ex: Exception) {
                 Log.e("WeatherError", ex.message.toString())
@@ -48,7 +48,6 @@ class WeatherActivity : AppCompatActivity() {
 
     private fun setWeather(
         binding: ActivityWeatherBinding,
-        cityName: String,
         countryName: String,
         temp: Double,
         sky: String,
@@ -57,7 +56,6 @@ class WeatherActivity : AppCompatActivity() {
         windDir: Int,
         feelsLike: Double
     ) {
-        binding.cityTv.text = cityName
         binding.countryTv.text = countryName
         binding.skyTv.text = sky
         binding.tempTv.text = resources.getString(R.string.temp_tv, temp)

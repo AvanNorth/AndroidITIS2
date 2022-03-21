@@ -1,9 +1,7 @@
-package com.pskda.androiditis2.data
+package com.pskda.androiditis2.di
 
-import com.pskda.androiditis2.BuildConfig
+import androidx.viewbinding.BuildConfig
 import com.pskda.androiditis2.data.api.Api
-import com.pskda.androiditis2.data.api.response.WeatherResponse
-import com.pskda.androiditis2.data.api.response.WeatherResponseList
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -11,10 +9,17 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 private const val BASE_URL = "https://api.openweathermap.org/data/2.5/"
+
 private const val API_KEY = "27c7562ae39fc5e14083e53be2619ffe"
 private const val QUERY_API_KEY = "appid"
 
-class WeatherRepository {
+private const val METRIC = "metric"
+private const val QUERY_UNITS = "units"
+
+private const val LANG_CODE = "en"
+private const val QUERY_LANG = "lang"
+
+class DIContainer {
     private val apiKeyInterceptor = Interceptor { chain ->
         val original = chain.request()
         val newURL = original.url.newBuilder()
@@ -28,9 +33,37 @@ class WeatherRepository {
         )
     }
 
+    private val unitsInterceptor = Interceptor { chain ->
+        val original = chain.request()
+        val newURL = original.url.newBuilder()
+            .addQueryParameter(QUERY_UNITS, METRIC)
+            .build()
+
+        chain.proceed(
+            original.newBuilder()
+                .url(newURL)
+                .build()
+        )
+    }
+
+    private val langInterceptor = Interceptor { chain ->
+        val original = chain.request()
+        val newURL = original.url.newBuilder()
+            .addQueryParameter(QUERY_LANG, LANG_CODE)
+            .build()
+
+        chain.proceed(
+            original.newBuilder()
+                .url(newURL)
+                .build()
+        )
+    }
+
     private val okhttp: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .addInterceptor(apiKeyInterceptor)
+            .addInterceptor(unitsInterceptor)
+            .addInterceptor(langInterceptor)
             .also {
                 if (BuildConfig.DEBUG) {
                     it.addInterceptor(
@@ -51,17 +84,5 @@ class WeatherRepository {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(Api::class.java)
-    }
-
-    suspend fun getWeather(cityName: String): WeatherResponse {
-        return api.getWeather(cityName)
-    }
-
-    suspend fun getWeather(cityId: Int): WeatherResponse {
-        return api.getWeather(cityId)
-    }
-
-    suspend fun getNearWeather(lat: Double, lon: Double): WeatherResponseList {
-        return api.getNearCity(lat, lon)
     }
 }

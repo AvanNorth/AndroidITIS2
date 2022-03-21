@@ -1,4 +1,4 @@
-package com.pskda.androiditis2.data.api.response
+package com.pskda.androiditis2.data.api.model
 
 import com.google.gson.annotations.SerializedName
 

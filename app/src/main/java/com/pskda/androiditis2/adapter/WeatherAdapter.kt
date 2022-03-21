@@ -7,9 +7,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.pskda.androiditis2.R
-import com.pskda.androiditis2.data.api.response.WeatherResponseList
+import com.pskda.androiditis2.data.api.model.WeatherResponseList
+import com.pskda.androiditis2.domain.entity.Cities
 
-class WeatherAdapter(private val cities: WeatherResponseList) :
+class WeatherAdapter(private val cities: Cities) :
     RecyclerView.Adapter<WeatherAdapter.WeatherViewHolder>() {
     class WeatherViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val cityNameTV: TextView = itemView.findViewById(R.id.name_tv)
@@ -24,9 +25,9 @@ class WeatherAdapter(private val cities: WeatherResponseList) :
     }
 
     override fun onBindViewHolder(holder: WeatherViewHolder, position: Int) {
-        holder.cityNameTV.text = cities.weatherList[position].name
-        holder.cityTempTV.text = "температура: ${cities.weatherList[position].main.temp}"
-        holder.cityTempTV.setTextColor(Color.parseColor(getTempColor(cities.weatherList[position].main.temp)))
+        holder.cityNameTV.text = cities.list[position].name
+        holder.cityTempTV.text = "температура: ${cities.list[position].temp}"
+        holder.cityTempTV.setTextColor(Color.parseColor(getTempColor(cities.list[position].temp)))
     }
 
     private fun getTempColor(temp: Double): String {
