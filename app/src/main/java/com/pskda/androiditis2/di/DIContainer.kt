@@ -1,7 +1,16 @@
 package com.pskda.androiditis2.di
 
+import android.content.Context
 import androidx.viewbinding.BuildConfig
+import com.pskda.androiditis2.data.WeatherRepositoryImpl
 import com.pskda.androiditis2.data.api.Api
+import com.pskda.androiditis2.data.api.mapper.WeatherMapper
+import com.pskda.androiditis2.domain.conventer.WindConverter
+import com.pskda.androiditis2.domain.repository.WeatherRepository
+import com.pskda.androiditis2.domain.usecase.GetNearCitiesUseCase
+import com.pskda.androiditis2.domain.usecase.GetWeatherByIdUseCase
+import com.pskda.androiditis2.domain.usecase.GetWeatherByNameUseCase
+import kotlinx.coroutines.Dispatchers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -19,7 +28,9 @@ private const val QUERY_UNITS = "units"
 private const val LANG_CODE = "en"
 private const val QUERY_LANG = "lang"
 
-class DIContainer {
+class DIContainer(
+    private val context: Context
+) {
     private val apiKeyInterceptor = Interceptor { chain ->
         val original = chain.request()
         val newURL = original.url.newBuilder()
@@ -85,4 +96,28 @@ class DIContainer {
             .build()
             .create(Api::class.java)
     }
+
+    private val weatherMapper: WeatherMapper = WeatherMapper(
+        windConverter = WindConverter()
+    )
+
+    private val weatherRepository: WeatherRepository = WeatherRepositoryImpl(
+        api = api,
+        weatherMapper = weatherMapper
+    )
+
+    val getNearCitiesUseCase: GetNearCitiesUseCase = GetNearCitiesUseCase(
+        weatherRepository = weatherRepository,
+        dispatcher = Dispatchers.Default
+    )
+
+    val getWeatherByIdUseCase: GetWeatherByIdUseCase = GetWeatherByIdUseCase(
+        weatherRepository = weatherRepository,
+        dispatcher = Dispatchers.Default
+    )
+
+    val getWeatherByNameUseCase: GetWeatherByNameUseCase = GetWeatherByNameUseCase(
+        weatherRepository = weatherRepository,
+        dispatcher = Dispatchers.Default
+    )
 }

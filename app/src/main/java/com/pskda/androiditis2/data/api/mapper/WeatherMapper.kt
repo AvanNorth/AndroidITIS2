@@ -2,11 +2,14 @@ package com.pskda.androiditis2.data.api.mapper
 
 import com.pskda.androiditis2.data.api.model.WeatherResponse
 import com.pskda.androiditis2.data.api.model.WeatherResponseList
+import com.pskda.androiditis2.domain.conventer.WindConverter
 import com.pskda.androiditis2.domain.entity.Cities
 import com.pskda.androiditis2.domain.entity.Weather
 
 
-class WeatherMapper {
+class WeatherMapper(
+    private val windConverter: WindConverter
+) {
     fun toWeather(response: WeatherResponse): Weather = Weather(
         id = response.id,
         name = response.name,
@@ -18,7 +21,7 @@ class WeatherMapper {
         feelsLike = response.main.feelsLike,
         humidity = response.main.humidity,
         windSpeed = response.wind.speed,
-        windDir = response.wind.deg,
+        windDir = windConverter.convertWindDir(response.wind.deg),
         timezone = response.timezone,
         sunrise = response.sys.sunrise,
         sunset = response.sys.sunset

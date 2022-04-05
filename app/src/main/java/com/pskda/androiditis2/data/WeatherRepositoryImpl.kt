@@ -8,10 +8,6 @@ import com.pskda.androiditis2.domain.entity.Cities
 import com.pskda.androiditis2.domain.entity.Weather
 import com.pskda.androiditis2.domain.repository.WeatherRepository
 
-private const val BASE_URL = "https://api.openweathermap.org/data/2.5/"
-private const val API_KEY = "27c7562ae39fc5e14083e53be2619ffe"
-private const val QUERY_API_KEY = "appid"
-
 class WeatherRepositoryImpl(
     private val api: Api,
     private val weatherMapper: WeatherMapper

@@ -11,7 +11,7 @@ data class Weather(
     val feelsLike: Double,
     val humidity: Int,
     val windSpeed: Double,
-    val windDir: Int,
+    val windDir: String,
     val timezone: Int,
     val sunrise: Int,
     val sunset: Int,

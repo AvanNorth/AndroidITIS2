@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,9 +21,12 @@ import com.pskda.androiditis2.adapter.WeatherAdapter
 import com.pskda.androiditis2.data.WeatherRepositoryImpl
 import com.pskda.androiditis2.data.api.model.WeatherResponseList
 import com.pskda.androiditis2.databinding.ActivityMainBinding
+import com.pskda.androiditis2.di.DIContainer
 import com.pskda.androiditis2.domain.entity.Cities
 import com.pskda.androiditis2.domain.usecase.GetNearCitiesUseCase
 import com.pskda.androiditis2.domain.usecase.GetWeatherByNameUseCase
+import com.pskda.androiditis2.presentation.viewmodel.ListViewModel
+import com.pskda.androiditis2.utils.factory.ViewModelFactory
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -30,34 +34,30 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var getNearWeather: GetNearCitiesUseCase
     private lateinit var getWeahterByNameUseCase: GetWeatherByNameUseCase
+    private lateinit var viewModel: ListViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        initObjects()
+        setQueryListener()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        initList()
+
+    }
+
+    private fun initObjects() {
+        val factory = ViewModelFactory(DIContainer(this))
+        viewModel = ViewModelProvider(
+            this,
+            factory
+        )[ListViewModel::class.java]
+    }
 
 
-        binding.searchView.setOnQueryTextListener(object : OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                if (query != null)
-                    searchCity(query)
-                else
-                    Snackbar.make(
-                        findViewById(android.R.id.content),
-                        "Строка не должна быть пустой",
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                return false
-            }
-        }
-        )
-
+    private fun checkPermission(){
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -79,8 +79,30 @@ class MainActivity : AppCompatActivity() {
             }
             return
         }
+    }
 
+    private fun setQueryListener(){
+        binding.searchView.setOnQueryTextListener(object : OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                if (query != null)
+                    searchCity(query)
+                else
+                    Snackbar.make(
+                        findViewById(android.R.id.content),
+                        "Строка не должна быть пустой",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                return false
+            }
 
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        }
+        )
+    }
+
+    private fun initList(){
         val weatherList: RecyclerView = binding.weatherList
         weatherList.layoutManager = LinearLayoutManager(this)
         lifecycleScope.launch {
@@ -88,6 +110,7 @@ class MainActivity : AppCompatActivity() {
                 var lat = 57.0
                 var lon = -2.15
 
+                checkPermission()
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location: Location? ->
                         if (location != null) {
